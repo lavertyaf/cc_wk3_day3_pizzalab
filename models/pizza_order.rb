@@ -1,5 +1,7 @@
 require('pg')
 require('pry')
+require_relative('customer')
+require_relative('../db/sql_runner')
 
 class PizzaOrder
 
@@ -7,14 +9,14 @@ class PizzaOrder
   attr_reader :id
 
   def initialize(options)
+    @id = options['id'].to_i if options['id']
     @customer_id = options['customer_id'].to_i
     @topping = options['topping']
     @quantity = options['quantity'].to_i
-    @id = options['id'].to_i if options['id']
+
   end
 
   def save()
-    db = PG.connect({ dbname: 'pizza_shop', host: 'localhost' })
     sql = "INSERT INTO pizza_orders
     (
       customer_id,
@@ -26,9 +28,7 @@ class PizzaOrder
     )
     RETURNING id"
     values = [@customer_id, @topping, @quantity]
-    db.prepare("save", sql)
-    @id = db.exec_prepared("save", values)[0]["id"].to_i
-    db.close()
+    @id = SqlRunner.run(sql, values)[0]["id"].to_i
   end
 
   def update()
@@ -64,19 +64,13 @@ class PizzaOrder
   end
 
   def self.delete_all()
-    db = PG.connect({ dbname: 'pizza_shop', host: 'localhost' })
     sql = "DELETE FROM pizza_orders"
-    db.prepare("delete_all", sql)
-    db.exec_prepared("delete_all")
-    db.close()
+    SqlRunner.run(sql)
   end
 
   def self.all()
-    db = PG.connect({ dbname: 'pizza_shop', host: 'localhost' })
     sql = "SELECT * FROM pizza_orders"
-    db.prepare("all", sql)
-    orders = db.exec_prepared("all")
-    db.close()
+    orders = SqlRunner.run(sql)
     return orders.map { |order| PizzaOrder.new(order) }
   end
 

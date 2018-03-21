@@ -2,8 +2,8 @@ require("pry")
 require_relative('../models/pizza_order')
 require_relative('../models/customer')
 
-PizzaOrder.delete_all()
-Customer.delete_all()
+# PizzaOrder.delete_all()
+# Customer.delete_all()
 
 customer1 = Customer.new({ 'name' => 'Zsolt' })
 customer1.save()
